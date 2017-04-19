@@ -8,6 +8,9 @@ package lift;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
@@ -102,6 +105,12 @@ public class Lift extends javax.swing.JFrame implements Runnable{
         lift.setOpaque(true);
         lift.setBackground(new Color(120, 120, 120));
         add(lift);
+       
+        lantai = new ArrayList();
+        
+        for(int i=0;i<jmlLantai;i++){ //inisialisasi lantai
+            lantai.add(new Lantai());
+        }
         
         Thread th = new Thread(this);
         th.start();
@@ -129,6 +138,8 @@ public class Lift extends javax.swing.JFrame implements Runnable{
     
     @Override
     public void run() {
+        SpawnPerson spawn = new SpawnPerson();
+        spawn.start();
         while(true) {
             try {
                 cycle();
@@ -138,8 +149,33 @@ public class Lift extends javax.swing.JFrame implements Runnable{
         }
     }
     
-    public class Lantai {
+    class SpawnPerson extends Thread{
+        int countPerson = 0;
+        @Override
+        public void run() {
+            while(true) {                
+                int spawn = (int) (Math.random()*jmlLantai);
+                lantai.get(spawn).person.add("p"+countPerson);
+                lantai.get(spawn).personCount++;
+                JLabel person = new JLabel("p"+countPerson);
+                person.setBounds(220 + (lantai.get(spawn).personCount * 20), ((jmlLantai-spawn-1)*65) + 10, 30, 40);
+                add(person);
+                repaint();
+                System.out.println("p"+countPerson+" at lantai "+spawn);
+                countPerson++;
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Lift.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
         
+    }
+    
+    public class Lantai {
+        int personCount = 0;
+        ArrayList<String> person = new ArrayList();
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
