@@ -10,6 +10,7 @@ import java.awt.Font;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -28,7 +29,7 @@ public class Lift extends javax.swing.JFrame implements Runnable{
             
     public Lift() {
         initComponents();
-        setSize(500, (jmlLantai*65) + 40);
+        setSize(500, (jmlLantai*65) + 30);
         setResizable(false);
         setLocationRelativeTo(null);
         prepare();
@@ -142,7 +143,7 @@ public class Lift extends javax.swing.JFrame implements Runnable{
         spawn.start();
         while(true) {
             try {
-                cycle();
+//                cycle();
                 Thread.sleep(100);
             } catch (Exception e) {
             }
@@ -157,14 +158,17 @@ public class Lift extends javax.swing.JFrame implements Runnable{
                 int spawn = (int) (Math.random()*jmlLantai);
                 lantai.get(spawn).person.add("p"+countPerson);
                 lantai.get(spawn).personCount++;
-                JLabel person = new JLabel("p"+countPerson);
-                person.setBounds(220 + (lantai.get(spawn).personCount * 20), ((jmlLantai-spawn-1)*65) + 10, 30, 40);
+                JLabel person = new JLabel(""+countPerson);
+                person.setBounds(190 + (lantai.get(spawn).personCount * 15), ((jmlLantai-spawn-1)*65) + 20, 25, 25);
+                Icon icon = new ImageIcon("src/img/man.png");
+                person.setIcon(icon);
+                person.setOpaque(false);
                 add(person);
                 repaint();
                 System.out.println("p"+countPerson+" at lantai "+spawn);
                 countPerson++;
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Lift.class.getName()).log(Level.SEVERE, null, ex);
                 }
