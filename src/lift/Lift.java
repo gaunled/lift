@@ -155,10 +155,13 @@ public class Lift extends javax.swing.JFrame implements Runnable{
         public void run() {
             while(true) {                
                 int spawn = (int) (Math.random()*jmlLantai);
+                
+                JLabel person = new JLabel(new ImageIcon("src/img/man.png"));
+                person.setBounds(220 + (lantai.get(spawn).personCount * 20), ((jmlLantai-spawn-1)*65) + 10, 50, 50);
+                
                 lantai.get(spawn).person.add("p"+countPerson);
+                lantai.get(spawn).personImage.add(person);
                 lantai.get(spawn).personCount++;
-                JLabel person = new JLabel("p"+countPerson);
-                person.setBounds(220 + (lantai.get(spawn).personCount * 20), ((jmlLantai-spawn-1)*65) + 10, 30, 40);
                 add(person);
                 repaint();
                 System.out.println("p"+countPerson+" at lantai "+spawn);
@@ -176,6 +179,7 @@ public class Lift extends javax.swing.JFrame implements Runnable{
     public class Lantai {
         int personCount = 0;
         ArrayList<String> person = new ArrayList();
+        ArrayList<JLabel> personImage = new ArrayList();
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
