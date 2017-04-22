@@ -9,22 +9,20 @@ import java.util.Random;
 
 public class Person {
     String id;
-    String imageurl;
+    String url;
     int awal;
     int akhir;
-    int x;
     boolean finish;
 
     public Person(String id, int jmllantai) {
         Random rand = new Random();
         this.id = id;
-        this.imageurl = "img/Standing Man Filled-50.png";
         this.awal = rand.nextInt(jmllantai);
+        this.url = "src/img/man.png";
         do {
             this.akhir = rand.nextInt(jmllantai);
         } while (this.awal == this.akhir);
         this.finish = false;
-        this.x = 20;
     }
     
     public String getId() {
@@ -35,12 +33,12 @@ public class Person {
         this.id = id;
     }
 
-    public String getImageurl() {
-        return imageurl;
+    public String getUrl() {
+        return url;
     }
 
-    public void setImageurl(String imageurl) {
-        this.imageurl = imageurl;
+    public void setUrl(String url) {
+        this.url = url;
     }
     
     public int getAwal() {
@@ -59,14 +57,6 @@ public class Person {
         this.akhir = akhir;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-    
     public boolean isFinish() {
         return finish;
     }

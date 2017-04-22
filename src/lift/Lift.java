@@ -8,6 +8,8 @@ package lift;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Icon;
@@ -16,14 +18,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 public class Lift extends javax.swing.JFrame implements Runnable{
-
-    public static final String UP = "UP";
-    public static final String DOWN = "DOWN";
-    
-    
+ 
+    public static Random rand = new Random();
     public static int jmlLantai;
     public static ArrayList<Lantai> lantai;
-    public static String arah;
+    public static Semaphore semaphore = new Semaphore(1);
     
     private JLabel lift;
             
@@ -99,87 +98,143 @@ public class Lift extends javax.swing.JFrame implements Runnable{
             add(temp);
         }
         
-        arah = UP;
-        
-        lift = new JLabel();
-        lift.setBounds(150, (jmlLantai-1)*65, 50, 65);
-        lift.setOpaque(true);
-        lift.setBackground(new Color(120, 120, 120));
-        add(lift);
-       
         lantai = new ArrayList();
-        
-        for(int i=0;i<jmlLantai;i++){ //inisialisasi lantai
-            lantai.add(new Lantai());
-        }
-        
         Thread th = new Thread(this);
         th.start();
-    }
-
-    public void cycle() {
-        if (arah.equals(UP)) {
-            int newY = lift.getY() - 2;
-            if (newY > 0) {
-                lift.setBounds(150, lift.getY() - 10, 50, 65);
-            } else {
-                lift.setBounds(150, 0, 50, 65);
-                arah = DOWN;
-            }
-        } else {
-            int newY = lift.getY() + 2;
-            if (newY < (jmlLantai-1)*65) {
-                lift.setBounds(150, lift.getY() + 10, 50, 65);
-            } else {
-                lift.setBounds(150, (jmlLantai-1)*65, 50, 65);
-                arah = UP;
-            }
-        }
     }
     
     @Override
     public void run() {
-        SpawnPerson spawn = new SpawnPerson();
-        spawn.start();
-        while(true) {
+        Elevator elevator = new Elevator();
+        for (int i = 0; i < jmlLantai; i++) {
+            Lantai l = new Lantai(i);
+            lantai.add(l);
+            l.start();
+        }
+        elevator.start();
+        while (true) {
+            if (lantai.get(elevator.getCurrentlantai()).person.size() > 0) {
+                elevator.person.add(lantai.get(elevator.getCurrentlantai()).person.get(0));
+                lantai.get(elevator.getCurrentlantai()).person.remove(0);
+                lantai.get(elevator.getCurrentlantai()).listlabel.remove(0);
+                elevator.setTujuanlantai(elevator.person.get(0).akhir);
+            }
             try {
-//                cycle();
-                Thread.sleep(100);
+                Thread.sleep(1000);
             } catch (Exception e) {
             }
         }
     }
     
-    class SpawnPerson extends Thread{
-        int countPerson = 0;
+    class Lantai extends Thread{
+        int lt;
+        ArrayList<Person> person = new ArrayList();
+        ArrayList<JLabel> listlabel = new ArrayList();
+
+        public Lantai(int lt) {
+            this.lt = lt;
+        }
+        
         @Override
         public void run() {
-            while(true) {                
-                int spawn = (int) (Math.random()*jmlLantai);
-                lantai.get(spawn).person.add("p"+countPerson);
-                lantai.get(spawn).personCount++;
-                JLabel person = new JLabel(""+countPerson);
-                person.setBounds(190 + (lantai.get(spawn).personCount * 15), ((jmlLantai-spawn-1)*65) + 20, 25, 25);
-                Icon icon = new ImageIcon("src/img/man.png");
-                person.setIcon(icon);
-                person.setOpaque(false);
-                add(person);
-                repaint();
-                System.out.println("p"+countPerson+" at lantai "+spawn);
-                countPerson++;
+            while(true) {
                 try {
-                    Thread.sleep(5000);
+                    semaphore.acquire();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Lift.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                Person p = new Person("P"+person.size(), jmlLantai);
+                JLabel lblperson = new JLabel(p.getId());
+                lblperson.setBounds(190 + (person.size() * 15), (lt*65) + 20, 25, 25);
+                lblperson.setIcon(new ImageIcon(p.getUrl()));
+                lblperson.setOpaque(false);
+                add(lblperson);
+                listlabel.add(lblperson);
+                person.add(p);
+                repaint();
+                semaphore.release();
+                try {
+                    Thread.sleep(rand.nextInt(10000) + 3000);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Lift.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
         
+        
     }
     
-    public class Lantai {
-        int personCount = 0;
-        ArrayList<String> person = new ArrayList();
+    class Elevator extends Thread{
+        int count = 0;
+        int currentlantai = 0;
+        int tujuanlantai = 0;
+        int arah = -1; //1 -> Naik, 0 -> Turun
+        ArrayList<Person> person = new ArrayList();
+
+        public Elevator() {
+            lift = new JLabel();
+            lift.setBounds(150, (jmlLantai-currentlantai-1)*65, 50, 65);
+            lift.setOpaque(true);
+            lift.setBackground(new Color(120, 120, 120));
+            add(lift);
+        }
+        
+        @Override
+        public void run() {
+            
+            while(true) {
+                if (tujuanlantai > currentlantai) {
+                    currentlantai++;
+                    arah = 1;
+                } else if (tujuanlantai < currentlantai) {
+                    currentlantai--;
+                    arah = 0;
+                } else {
+                    arah = -1;
+                }
+                lift.setBounds(150, (jmlLantai-currentlantai-1)*65, 50, 65);
+                repaint();
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                }
+            }
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public void setCount(int count) {
+            this.count = count;
+        }
+
+        public int getCurrentlantai() {
+            return currentlantai;
+        }
+
+        public void setCurrentlantai(int currentlantai) {
+            this.currentlantai = currentlantai;
+        }
+
+        public int getTujuanlantai() {
+            return tujuanlantai;
+        }
+
+        public void setTujuanlantai(int tujuanlantai) {
+            this.tujuanlantai = tujuanlantai;
+        }
+
+        public int getArah() {
+            return arah;
+        }
+
+        public void setArah(int arah) {
+            this.arah = arah;
+        }
+        
+        
+        
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
