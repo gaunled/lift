@@ -145,7 +145,7 @@ public class Lift extends javax.swing.JFrame implements Runnable{
                 }
                 Person p = new Person("P"+person.size(), jmlLantai);
                 JLabel lblperson = new JLabel(p.getId());
-                lblperson.setBounds(190 + (person.size() * 15), (lt*65) + 20, 25, 25);
+                lblperson.setBounds(210 + (person.size() * 15), (lt*65) + 20, 25, 25);
                 lblperson.setIcon(new ImageIcon(p.getUrl()));
                 lblperson.setOpaque(false);
                 add(lblperson);
@@ -195,7 +195,7 @@ public class Lift extends javax.swing.JFrame implements Runnable{
                 lift.setBounds(150, (jmlLantai-currentlantai-1)*65, 50, 65);
                 repaint();
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(1000);
                 } catch (Exception e) {
                 }
             }
@@ -233,9 +233,7 @@ public class Lift extends javax.swing.JFrame implements Runnable{
             this.arah = arah;
         }
         
-        
-        
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
+    }
 }
